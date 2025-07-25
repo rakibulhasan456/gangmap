@@ -4,7 +4,7 @@ export async function loadAreasToMap(map, turfLayer, hoodLayer, zoneLayer, label
   const types = ['turf', 'hood', 'zone'];
   for (const type of types) {
     try {
-      const response = await fetch(`${type}Data.json`); // Updated path: no 'data/' prefix
+      const response = await fetch(`assets/data/${type}Data.json`); // Ensure correct relative path to data files
       if (!response.ok) {
         console.warn(`No data found for ${type}, returning empty array`);
         continue;
