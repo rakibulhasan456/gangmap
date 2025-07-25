@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>gangmap_legacyrpbd_new</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/gta5-map.css">
+</head>
+
+<body><!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>GTA V Gang Territory Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet Draw CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100vw;
+      background: linear-gradient(to right, #1BA9CF, #0FA8D2);
+      background-size: cover;
+      background-repeat: no-repeat;
+      position: relative;
+      transition: margin-right 0.3s ease;
+    }
+
+    /* Sidebar styling */
+    #drawing-sidebar {
+      position: fixed;
+      top: 0;
+      right: -350px;
+      width: 350px;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: -3px 0 15px rgba(0,0,0,0.3);
+      padding: 25px;
+      box-sizing: border-box;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1100;
+      overflow-y: auto;
+      color: white;
+      display: none;
+    }
+
+    #drawing-sidebar.show {
+      right: 0;
+    }
+
+    #drawing-sidebar h2 {
+      margin-top: 0;
+      font-size: 24px;
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    #drawing-sidebar label {
+      display: block;
+      margin: 20px 0 8px 0;
+      font-weight: 600;
+      color: #f0f0f0;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #drawing-sidebar select, 
+    #drawing-sidebar input[type="text"],
+    #drawing-sidebar textarea {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    #drawing-sidebar textarea {
+      height: 150px;
+      resize: vertical;
+      margin-top: 10px;
+      display: none; /* Hidden by default */
+    }
+
+    #drawing-sidebar select:focus, 
+    #drawing-sidebar input[type="text"]:focus,
+    #drawing-sidebar textarea:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 1);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    #drawing-sidebar button {
+      margin-top: 25px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 32%;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 2%;
+    }
+
+    #submitBtn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    #submitBtn:hover {
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    #addAreaBtn {
+      background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    #addAreaBtn:hover {
+      background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    #cancelBtn {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    #cancelBtn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Tooltip styling */
+    .area-tooltip {
+      background: rgba(0,0,0,0.8) !important;
+      border: none !important;
+      border-radius: 6px !important;
+      color: white !important;
+      font-weight: bold !important;
+      text-align: center !important;
+      font-size: 12px !important;
+      padding: 6px 10px !important;
+      white-space: pre-line !important;
+    }
+
+    /* Rounded vertex handles */
+    .leaflet-div-icon.leaflet-editing-icon,
+    .leaflet-div-icon.leaflet-draw-icon {
+      border-radius: 50% !important;
+      width: 12px !important;
+      height: 12px !important;
+      margin-left: -6px !important;
+      margin-top: -6px !important;
+      background: #ff5733 !important;
+      border: 2px solid white !important;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    /* Gang dropdown styling */
+    #occupiedByDropdown {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    #occupiedByDropdown option {
+      padding: 8px;
+      font-weight: 500;
+    }
+
+    /* Layer control styling */
+    .leaflet-control-layers {
+      background: rgba(255,255,255,0.9) !important;
+      border-radius: 8px !important;
+      border: none !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    }
+
+    .leaflet-control-layers-title {
+      font-weight: 600 !important;
+      color: #333 !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Sidebar -->
+  <div id="drawing-sidebar">
+    <h2>Territory Details</h2>
+    <form id="territoryForm">
+      <label for="typeSelect">Type:</label>
+      <select id="typeSelect" name="typeSelect" required>
+        <option value="turf">Turf</option>
+        <option value="hood">Hood</option>
+        <option value="zone">Zone</option>
+      </select>
+
+      <label for="nameInput">Name:</label>
+      <input type="text" id="nameInput" name="nameInput" placeholder="Enter turf name" />
+
+      <label for="occupiedByDropdown" id="occupiedByLabel">Occupied By:</label>
+      <select id="occupiedByDropdown" name="occupiedByDropdown"></select>
+
+      <button type="button" id="submitBtn">Save</button>
+      <button type="button" id="addAreaBtn">Add Area</button>
+      <button type="button" id="cancelBtn">Cancel</button>
+
+      <label for="jsonOutput" id="jsonOutputLabel" style="display: none;">JSON Output (copy this to data/<type>Data.json):</label>
+      <textarea id="jsonOutput" readonly style="display: none;"></textarea>
+    </form>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="gta5-map.js"></script>
+  <script type="module" src="data-loader.js"></script>
+  <script type="module" src="storage.js"></script>
+  <script type="module" src="map-init.js"></script>
+
+  <script>
+    // Sidebar animation observer
+    const sidebar = document.getElementById('drawing-sidebar');
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          if (sidebar.style.display === 'block') {
+            setTimeout(() => sidebar.classList.add('show'), 10);
+          } else {
+            sidebar.classList.remove('show');
+          }
+        }
+      });
+    });
+    observer.observe(sidebar, { attributes: true });
+  </script>
+</body>
+</html>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/data-loader.js"></script>
+    <script src="assets/js/gang-info.js"></script>
+    <script src="assets/js/gta5-map.js"></script>
+    <script src="assets/js/leaflet-imports.js"></script>
+    <script src="assets/js/map-init.js"></script>
+    <script src="assets/js/storage.js"></script>
+</body>
+
+</html>
