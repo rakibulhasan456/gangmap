@@ -19,11 +19,11 @@ const mapHeight = 8192;
 const bounds = [[0, 0], [mapHeight, mapWidth]];
 
 // Static base layers (atlas and satellite) - with exact bounds
-const atlasLayer = L.imageOverlay('gta5_map_atlas.png', bounds, {
+const atlasLayer = L.imageOverlay('./assets/img/gta5_map_atlas.png', bounds, {
   interactive: false,
   bubblingMouseEvents: false
 });
-const satelliteLayer = L.imageOverlay('gta5_map_satellite.png', bounds, {
+const satelliteLayer = L.imageOverlay('./assets/img/gta5_map_satellite.png', bounds, {
   interactive: false,
   bubblingMouseEvents: false
 });
